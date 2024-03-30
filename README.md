@@ -10,7 +10,7 @@ CS422 UNLV Spring '24 | Electroencephalography (EEG) Classification to detect ha
 ## Overview
 This project aims to apply machine learning techniques to classify and detect harmful brain activity from electroencephalography (EEG) data. The goal is to detect various types of abnormal brain patterns, including seizures and other detrimental activities, to aid in medical diagnostics.
 
-# Dataset
+## Dataset
 Datasets are provided by Harvard Medical School. Details as well as the dataset can be obtained [here](https://www.kaggle.com/competitions/hms-harmful-brain-activity-classification/data).
 
 ## License
