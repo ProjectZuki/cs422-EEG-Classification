@@ -1,6 +1,11 @@
 # cs422-EEG-Classification
 CS422 UNLV Spring '24 | Electroencephalography (EEG) Classification to detect harmful brain activity. 
 
+### This project is the collaborative work of the following individuals:
+[ProjcetZuki](https://github.com/ProjectZuki) </br>
+[arianizadi](https://github.com/arianizadi)</br>
+[fourfourfourfourthreethreethree](https://github.com/fourfourfourfourthreethreethree)
+
 # Table of Contents
 
 1. [Overview](#overview)
