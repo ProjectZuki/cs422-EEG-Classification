@@ -1,2 +1,3 @@
 egg-data/*
 /eeg-data
+/__pycache__

@@ -34,7 +34,7 @@ def read_data(train_file, test_file):
 def main():
     if len(sys.argv) < 3:
         print("Usage: python", sys.argv[0], "<train_file> <test_file>")
-        return
+        exit(1)
 
     train_file = sys.argv[1]
     test_file = sys.argv[2]
