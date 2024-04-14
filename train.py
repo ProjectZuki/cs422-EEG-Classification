@@ -97,7 +97,7 @@ if __name__ == "__main__":
     
     Data Loading: x
     Exploratory Data Analysis (EDA): x
-    Data Preprocessing:
+    Data Preprocessing: x
     Feature Engineering:
     Model Training:
     Model Evaluation:
