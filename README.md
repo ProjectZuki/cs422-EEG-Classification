@@ -4,9 +4,7 @@ CS422 UNLV Spring '24 | Electroencephalography (EEG) Classification to detect ha
 
 This project is the collaborative work of the following individuals
 
-[ProjectZuki](https://github.com/ProjectZuki)
-[arianizadi](https://github.com/arianizadi)
-[fourfourfourfourthreethreethree](https://github.com/fourfourfourfourthreethreethree)
+## [ProjectZuki](https://github.com/ProjectZuki) | [arianizadi](https://github.com/arianizadi) | [fourfourfourfourthreethreethree](https://github.com/fourfourfourfourthreethreethree)
 
 ## Table of Contents
 
