@@ -18,6 +18,7 @@ from sklearn.impute import KNNImputer
 
 # user defined modules
 import data_load as dl
+import data_info as di
 
 def impute_null(data: pd.DataFrame) -> pd.DataFrame:
     """
@@ -74,19 +75,15 @@ def main():
     test_data : pd.DataFrame
     train_data, test_data = dl.read_data(sys.argv[1], sys.argv[2])
 
-    # Exploratory Data Analysis
-    # print(train_data.head())
-    # print("-" * 50)
-    # print(train_data.info())
-    # print("-" * 50)
-    # print(train_data.describe())
-    # print("-" * 50)
+    di.get_EDA(train_data)
+    di.get_EDA(test_data)
 
     # =========================== Data Preprocessing ===========================
     train_data, test_data = preprocess_data(train_data, test_data)
     # ============================ Categorical Data ============================
-
-    # feature scaling
+    # TODO
+    # ========================== Feature Engineering ===========================
+    # TODO
 
 if __name__ == "__main__":
     main()

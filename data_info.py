@@ -8,7 +8,7 @@ Output:
 import pandas as pd
 import sys
 
-def read_data(train_file, test_file):
+def get_info(train_file, test_file):
     """
     Reads the data from the training and testing sets.
 
@@ -31,14 +31,12 @@ def read_data(train_file, test_file):
     print(train_df.head())      # print first rows of train DataFrame
     print(train_df.info())      # print information about train DataFrame
 
-def main():
-    if len(sys.argv) < 3:
-        print("Usage: python", sys.argv[0], "<train_file> <test_file>")
-        exit(1)
-
-    train_file = sys.argv[1]
-    test_file = sys.argv[2]
-    read_data(train_file, test_file)
-
-if __name__ == "__main__":
-    main()
+def get_EDA(data):
+    # Exploratory Data Analysis
+    print(data.head())
+    print("-" * 50)
+    print(data.info())
+    print("-" * 50)
+    print(data.describe())
+    print("-" * 50)
+    
