@@ -19,6 +19,7 @@ from sklearn.impute import KNNImputer
 # user defined modules
 import data_load as dl
 import data_info as di
+import data_features as df
 
 def impute_null(data: pd.DataFrame) -> pd.DataFrame:
     """
@@ -55,13 +56,41 @@ def impute_null(data: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-
 def preprocess_data(train_data: pd.DataFrame, test_data: pd.DataFrame) -> tuple:
     # handle missing values
     train_data = impute_null(train_data)
     test_data = impute_null(test_data)
 
     return train_data, test_data
+
+def preprocess_metadata(metadata_file: str, spectograms_dir: str) -> pd.DataFrame:
+    """
+    NOTE: eeg_data/train_spectograms/ directory contains {spectogram_id}.parquet files
+    spectogram_id is provided by train.csv metadata
+    """
+
+    # read metadata
+    metadata = pd.read_csv(metadata_file)
+
+    # merge files
+    merged_data = pd.DataFrame()
+
+    for index, row in metadata.iterrows():
+        # get metadata rows (relevant)
+        spectogram_id = row['spectogram_id']        # spectogram_id from metadata
+        patient_id = row['patient_id']              # patient_id if necessary
+
+        # read spectogram data
+        spectogram_file = os.path.join(spectograms_dir, f"{spectogram_id}.parquet")
+        spectogram_data = pd.read_parquet(spectogram_file)
+
+        # merge metadata with spectogram data
+        merge_row = pd.concat([pd.Series(row), spectogram_data], axis=0)
+        # if utilizing optional patient_id
+        # merged_row = pd.concat([pd.Series(row), pd.Series({'patient_id': patient_id}), spectogram_data], axis=0)
+        merged_data = merged_data.append(merge_row, ignore_index=True)
+
+    return merged_data
 
 def main():
 
@@ -71,19 +100,35 @@ def main():
         print("Exiting ...")
         exit(1)
 
-    train_data : pd.DataFrame
-    test_data : pd.DataFrame
-    train_data, test_data = dl.read_data(sys.argv[1], sys.argv[2])
+    train_metadata : pd.DataFrame
+    test_metadata : pd.DataFrame
+    train_metadata, test_metadata = dl.read_data(sys.argv[1], sys.argv[2])
 
-    di.get_EDA(train_data)
-    di.get_EDA(test_data)
+    di.get_EDA(train_metadata)
+    di.get_EDA(test_metadata)
 
     # =========================== Data Preprocessing ===========================
-    train_data, test_data = preprocess_data(train_data, test_data)
-    # ============================ Categorical Data ============================
-    # TODO
+    # train/test metadata files
+    train_metadata, test_metadata = preprocess_data(train_metadata, test_metadata)
+
+    # merge with spectogram data
+    train_metadata_file = sys.argv[1]
+    spectograms_dir = "eeg_data/train_spectograms/"
+    merged_data = preprocess_metadata(train_metadata_file, spectograms_dir)
+
     # ========================== Feature Engineering ===========================
-    # TODO
+    # # generate polynomial features from data
+    # train_metadata_poly = df.get_poly_feat(train_metadata)
+    # test_metadata_poly = df.get_poly_feat(test_metadata)
+
+    # # manually set columns
+    # date_cols = ['date_col_1', 'date_col_2']
+    # # date features
+    # train_metadata = df.get_date_feat(train_metadata, date_cols)
+    # test_metadata = df.get_date_feat(test_metadata, date_cols
+
+    # ============================ Model Training =============================
+
 
 if __name__ == "__main__":
     main()
