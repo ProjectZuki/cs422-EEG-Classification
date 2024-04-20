@@ -15,6 +15,7 @@ import logging
 # import tensorflow.keras.backend as K
 
 from sklearn.impute import KNNImputer
+from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
 
 # user defined modules
 import data_load as dl
@@ -55,40 +56,53 @@ def impute_null(data: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-
-def preprocess_data(train_data: pd.DataFrame, test_data: pd.DataFrame) -> tuple:
-    # handle missing values
-    train_data = impute_null(train_data)
-    test_data = impute_null(test_data)
-
-    return train_data, test_data
-
-def preprocess_metadata(metadata_file: str, spectograms_dir: str) -> pd.DataFrame:
+def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     """
-    NOTE: eeg_data/train_spectograms/ directory contains {spectogram_id}.parquet files
-    spectogram_id is provided by train.csv metadata
+    Preprocesses the metadata file and merges with the spectrogram data.
     """
 
     # read metadata
-    metadata = pd.read_csv(metadata_file)
+    metadata = pd.read_csv("eeg-data/" + f"{metadata_file}")
 
-    # merge files
-    merged_data = pd.DataFrame()
+    # thread worker function
+    def process_row(row):
+        spectrogram_id = row['spectrogram_id']
 
-    for index, row in metadata.iterrows():
-        # get metadata rows (relevant)
-        spectogram_id = row['spectogram_id']        # spectogram_id from metadata
-        patient_id = row['patient_id']              # patient_id if necessary
+        print("Preprocessing:", spectrogram_id)
 
-        # read spectogram data
-        spectogram_file = os.path.join(spectograms_dir, f"{spectogram_id}.parquet")
-        spectogram_data = pd.read_parquet(spectogram_file)
+        spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
+        spectrogram_data = pd.read_parquet(spectrogram_file)
+        merge_row = pd.concat([pd.Series(row), spectrogram_data], axis=0)
+        return merge_row
 
-        # merge metadata with spectogram data
-        merge_row = pd.concat([pd.Series(row), spectogram_data], axis=0)
-        # if utilizing optional patient_id
-        # merged_row = pd.concat([pd.Series(row), pd.Series({'patient_id': patient_id}), spectogram_data], axis=0)
-        merged_data = merged_data.append(merge_row, ignore_index=True)
+    with ThreadPoolExecutor() as executor:
+        print("preprocessing:", metadata_file, "| Thread Count:", executor._max_workers)
+        # process task
+        futures = [executor.submit(process_row, row) for _, row in metadata.iterrows()]
+        # results from task completion
+        merged_data = pd.concat([future.result() for future in futures], ignore_index=True)
+
+        # Shutdown the ThreadPoolExecutor to ensure proper cleanup
+        executor.shutdown()
+
+    # # merge files
+    # merged_data = pd.DataFrame()
+
+    # for index, row in metadata.iterrows():
+    #     # get metadata rows (relevant)
+    #     spectrogram_id = row['spectrogram_id']        # spectrogram_id from metadata
+    #     # patient_id = row['patient_id']              # patient_id if necessary
+
+    #     # read spectrogram data
+    #     print("Preprocessing:", spectrogram_id)
+    #     spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
+    #     spectrogram_data = pd.read_parquet(spectrogram_file)
+
+    #     # merge metadata with spectrogram data
+    #     merge_row = pd.concat([pd.Series(row), spectrogram_data], axis=0)
+    #     # if utilizing optional patient_id
+    #     # merged_row = pd.concat([pd.Series(row), pd.Series({'patient_id': patient_id}), spectrogram_data], axis=0)
+    #     merged_data = merged_data._append(merge_row, ignore_index=True)
 
     return merged_data
 
@@ -108,13 +122,29 @@ def main():
     di.get_EDA(test_metadata)
 
     # =========================== Data Preprocessing ===========================
-    # train/test metadata files
-    train_metadata, test_metadata = preprocess_data(train_metadata, test_metadata)
+    # preprocess train/test metadata files, impute missing values
+    train_metadata = impute_null(train_metadata)
+    test_metadata  = impute_null(test_metadata)
 
-    # merge with spectogram data
+    # merge with spectrogram data
     train_metadata_file = sys.argv[1]
-    spectograms_dir = "eeg_data/train_spectograms/"
-    merged_data = preprocess_metadata(train_metadata_file, spectograms_dir)
+    print("Attempting")
+    spectrograms_dir = "eeg-data/train_spectrograms/"
+    merged_data = preprocess_data(train_metadata_file, spectrograms_dir)
+    print("finished")
+
+    """
+    NOTE: Spectrogram data contains time values, as well as the following:
+        LL - Left Lateral
+        RL - Right Lateral
+        LP - Left Parasagittal
+        RP - Right Parasagittal
+
+        eeg_data/train_spectrograms/ directory contains {spectrogram_id}.parquet files
+        spectrogram_id is provided by train.csv metadata
+    """
+    # preprocess spectrogram data
+    merged_train_data = preprocess_data(merged_data)
 
     # ========================== Feature Engineering ===========================
     # # generate polynomial features from data

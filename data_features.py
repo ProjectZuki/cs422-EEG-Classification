@@ -23,7 +23,7 @@ def get_poly_feat(data: pd.DataFrame, degree: int = 2) -> pd.DataFrame:
     columns = poly.get_feature_names(data.columns)
     return pd.DataFrame(poly_data, columns=columns, index=data.index)
 
-def get_date_feat(data: pd.DataFrame, date_col: list) -> pd>DataFrame:
+def get_date_feat(data: pd.DataFrame, date_col: list) -> pd.DataFrame:
     for col in date_col:
         data[col + '_year'] = data[col].dt.year
         data[col + '_month'] = data[col].dt.month

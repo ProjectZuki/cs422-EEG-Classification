@@ -11,7 +11,8 @@ This project is the collaborative work of the following individuals
 1. [Overview](#overview)
 2. [Dataset](#dataset)
 3. [Usage](#usage)
-4. [License](#license)
+4. [Dependencies](#dependencies)
+5. [License](#license)
 
 ## Overview
 
@@ -29,6 +30,17 @@ python train.py <train_file> <test_file>
 `unittest.py`
 ```bash
 python unittest.py
+```
+
+## Dependencies
+When running this project, the following python libraries are required:
+- pandas
+- numpy
+- tensorflow
+- sklearn
+
+```bash
+pip install pandas numpy tensorflow sklearn
 ```
 
 ## License

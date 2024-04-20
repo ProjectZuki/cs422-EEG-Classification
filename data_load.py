@@ -17,8 +17,8 @@ def read_data(train_file, test_file):
         pd.DataFrame: The contents of the testing data file.
     """
     try:
-        train_data = load_train_data('eeg-data/' + train_file)
-        test_data = load_test_data('eeg-data/' + test_file)
+        train_data = load_data('eeg-data/' + train_file)
+        test_data = load_data('eeg-data/' + test_file)
     except FileNotFoundError as e:
         print("File not found: ", e)
         print("Exiting ...")
@@ -26,26 +26,34 @@ def read_data(train_file, test_file):
 
     return train_data, test_data
 
-def load_train_data(train_file):
+def load_data(file):
     """
     Load training data
     
     Args:
-        train_file (str): Path to the CSV file containing training data.
+        file (str): Path to the file containing training data.
         
     Returns:
         pd.DataFrame: DataFrame containing the loaded training data.
     """
-    return pd.read_csv(train_file)
+    # Check file type, raise exception if not supported
+    if file.endswith('.csv'):
+        return pd.read_csv(file)
+    elif file.endswith('.parquet'):
+        return pd.read_parquet(file)
+    else:
+        raise ValueError("Unsupported file format. Only .csv and .parquet files are supported.")
 
-def load_test_data(test_file):
-    """
-    Load test data
+# def load_test_data(test_file):
+#     """
+#     Load test data
     
-    Args:
-        test_file (str): Path to the CSV file containing test data.
+#     Args:
+#         test_file (str): Path to the CSV file containing test data.
         
-    Returns:
-        pd.DataFrame: DataFrame containing the loaded test data.
-    """
-    return pd.read_csv(test_file)
+#     Returns:
+#         pd.DataFrame: DataFrame containing the loaded test data.
+#     """
+#     if 
+#     return pd.read_csv(test_file)
+
