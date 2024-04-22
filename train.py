@@ -26,11 +26,25 @@ import data_features as df
 
 def main():
 
+    # check args
+
     if len(sys.argv) < 3:
-        print("Error: Expected 3 arguments, recieved", len(sys.argv))
+        print("\n\033[91mError:\033[0m Expected 3 arguments, recieved", len(sys.argv))
         print("Usage: python", sys.argv[0], "<train_file> <test_file>")
-        print("Exiting ...")
+        print("For multithreading, add -m flag as 4th arg")
+        print("\033[91m\nExiting ...\n\033[0m")
         exit(1)
+
+    if len(sys.argv) == 4:
+        if sys.argv[3] == "-m":
+            dp.MULTITHREAD = True
+            print("Running with multithreading. CPU count:\033[92m", os.cpu_count(), "\033[0m")
+        else:
+            print("\n\033[91mError:\033[0m", sys.argv[3], "is not a valid flag")
+            print("Usage: python", sys.argv[0], "<train_file> <test_file>")
+            print("For multithreading, add -m flag as 4th arg")
+            print("\033[91m\nExiting ...\n\033[0m")
+            exit(1)
 
     train_metadata : pd.DataFrame
     test_metadata : pd.DataFrame

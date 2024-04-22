@@ -27,6 +27,8 @@ Datasets are provided by Harvard Medical School. Details as well as the dataset 
 ```bash
 python train.py <train_file> <test_file>
 ```
+_NOTE: For multithreading, include -m as 4th command line argument_
+
 `unittest.py`
 ```bash
 python unittest.py
