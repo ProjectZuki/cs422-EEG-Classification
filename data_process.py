@@ -9,8 +9,8 @@ import os
 from sklearn.impute import KNNImputer
 from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
 
-MULTITHREAD : bool = False
-TEST_FILE : str = "353733"      # change to filename for testing
+MULTITHREAD : bool = False  # multithreading flag
+TEST_FILE : str = None      # change to filename for testing
 
 def read_data(train_file, test_file):
     """
