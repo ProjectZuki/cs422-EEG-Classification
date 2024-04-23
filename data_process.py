@@ -9,7 +9,8 @@ import os
 from sklearn.impute import KNNImputer
 from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
 
-MULTITHREAD = False
+MULTITHREAD : bool = False
+TEST_FILE : str = "353733"      # change to filename for testing
 
 def read_data(train_file, test_file):
     """
@@ -93,6 +94,16 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     # read metadata
     metadata = pd.read_csv("eeg-data/" + f"{metadata_file}")
 
+    # for testing with single file
+    if TEST_FILE is not None:
+        spectrogram_id = TEST_FILE
+        print("Preprocssing:", spectrogram_id)
+        spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
+        spectrogram_data = pd.read_parquet(spectrogram_file)
+        merge_row = pd.concat([pd.Series({'spectrogram_id': spectrogram_id}), spectrogram_data.mean(axis=0)], axis=0)
+
+        return pd.DataFrame([merge_row])
+
     # ========================= multi-threaded method ==========================
     if MULTITHREAD:
     # thread worker function
@@ -115,7 +126,6 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
 
             # Shutdown the ThreadPoolExecutor to ensure proper cleanup
             executor.shutdown()
-    # ==========================================================================
 
     # ============================= Single-threaded ============================
     else:

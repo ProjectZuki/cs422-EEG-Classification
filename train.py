@@ -75,8 +75,8 @@ def main():
         eeg_data/train_spectrograms/ directory contains {spectrogram_id}.parquet files
         spectrogram_id is provided by train.csv metadata
     """
-    # preprocess spectrogram data
-    merged_train_data = dp.preprocess_data(merged_data)
+    # # preprocess spectrogram data
+    # merged_train_data = dp.preprocess_data(merged_data)
 
     # ========================== Feature Engineering ===========================
     # # generate polynomial features from data
@@ -87,7 +87,7 @@ def main():
     # date_cols = ['date_col_1', 'date_col_2']
     # # date features
     # train_metadata = df.get_date_feat(train_metadata, date_cols)
-    # test_metadata = df.get_date_feat(test_metadata, date_cols
+    # test_metadata = df.get_date_feat(test_metadata, date_cols)
 
     # ============================ Model Training =============================
 
