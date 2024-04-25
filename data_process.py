@@ -9,8 +9,10 @@ import os
 from sklearn.impute import KNNImputer
 from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
 
-MULTITHREAD : bool = False  # multithreading flag
-TEST_FILE : str = None      # change to filename for testing
+MULTITHREAD : bool  = False  # multithreading flag
+TEST_FILE   : str   = None   # change to filename for testing
+TEST_MODE   : bool  = True  # testing mode flag
+BATCH_SIZE  : int   = 100    # batch size for testing
 
 def read_data(train_file, test_file):
     """
@@ -94,58 +96,51 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     # read metadata
     metadata = pd.read_csv("eeg-data/" + f"{metadata_file}")
 
-    # for testing with single file
-    if TEST_FILE is not None:
-        spectrogram_id = TEST_FILE
-        print("Preprocssing:", spectrogram_id)
+    if TEST_MODE:
+        batch = metadata[:BATCH_SIZE]
+    else:
+        batch = metadata
+
+    # # for testing with single file
+    # if TEST_FILE is not None:
+    #     spectrogram_id = TEST_FILE
+    #     print("Preprocssing:", spectrogram_id)
+
+    #     spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
+    #     spectrogram_data = pd.read_parquet(spectrogram_file)
+    #     merge_row = pd.concat([pd.Series({'spectrogram_id': spectrogram_id}), spectrogram_data.mean(axis=0)], axis=0)
+
+    #     return pd.DataFrame([merge_row])
+
+    # helper function to process single row of data
+    def process_row(row):
+        spectrogram_id = row['spectrogram_id']
+
+        print("Preprocessing:", spectrogram_id)
+
         spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
         spectrogram_data = pd.read_parquet(spectrogram_file)
-        merge_row = pd.concat([pd.Series({'spectrogram_id': spectrogram_id}), spectrogram_data.mean(axis=0)], axis=0)
-
-        return pd.DataFrame([merge_row])
-
+        merge_row = pd.concat([pd.Series(row), spectrogram_data], axis=0)
+        return merge_row
+    
     # ========================= multi-threaded method ==========================
+    
+    merged_data = pd.DataFrame()
+
     if MULTITHREAD:
     # thread worker function
-        def process_row(row):
-            spectrogram_id = row['spectrogram_id']
-
-            print("Preprocessing:", spectrogram_id)
-
-            spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
-            spectrogram_data = pd.read_parquet(spectrogram_file)
-            merge_row = pd.concat([pd.Series(row), spectrogram_data], axis=0)
-            return merge_row
 
         with ThreadPoolExecutor() as executor:
-            print("preprocessing:", metadata_file, "| Thread Count:", executor._max_workers)
-            # process task
-            futures = [executor.submit(process_row, row) for _, row in metadata.iterrows()]
-            # results from task completion
-            merged_data = pd.concat([future.result() for future in futures], ignore_index=True)
-
-            # Shutdown the ThreadPoolExecutor to ensure proper cleanup
-            executor.shutdown()
+            # Process batch
+            futures = [executor.submit(process_row, row) for _, row in batch.iterrows()]
+            # Collect results
+            results = [future.result() for future in futures]
+            merged_data = pd.concat(results, ignore_index=True)
 
     # ============================= Single-threaded ============================
     else:
-        # merge files
-        merged_data = pd.DataFrame()
-
-        for index, row in metadata.iterrows():
-            # get metadata rows (relevant)
-            spectrogram_id = row['spectrogram_id']        # spectrogram_id from metadata
-            # patient_id = row['patient_id']              # patient_id if necessary
-
-            # read spectrogram data
-            print("Preprocessing:", spectrogram_id)
-            spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
-            spectrogram_data = pd.read_parquet(spectrogram_file)
-
-            # merge metadata with spectrogram data
-            merge_row = pd.concat([pd.Series(row), spectrogram_data], axis=0)
-            # if utilizing optional patient_id
-            # merged_row = pd.concat([pd.Series(row), pd.Series({'patient_id': patient_id}), spectrogram_data], axis=0)
-            merged_data = merged_data._append(merge_row, ignore_index=True)
+        for _, row in batch.iterrows():
+            merge_row = process_row(row)
+            merged_data = pd.concat([merged_data, merge_row], ignore_index=True)
     # ==========================================================================
     return merged_data
