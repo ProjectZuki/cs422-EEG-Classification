@@ -7,6 +7,7 @@ import numpy as np
 import sys
 import os
 import logging
+import time
 
 # import tensorflow as tf
 # import tensorflow.keras.layers as layers
@@ -93,7 +94,17 @@ def main():
 
 
 if __name__ == "__main__":
+    # set logging level
+    logging.basicConfig(level=logging.INFO)
+
+    # start timing
+    start_time = time.time()
+
     main()
+
+    # end timing
+    end_time = time.time()
+    print("Execution time in seconds: %s" % (end_time - start_time))
 
 
 """
