@@ -17,6 +17,7 @@ import time
 
 from sklearn.impute import KNNImputer
 from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
+from sklearn.model_selection import train_test_split
 
 # user defined modules
 import data_process as dp
@@ -27,7 +28,7 @@ def get_time(start_time):
     # end time
     end_time = time.time()
     print()
-    print("-" * 50)
+    print("-" * 65)
     execution_time = end_time - start_time
 
     # convert time to HH:MM:SS.mmm format
@@ -44,7 +45,7 @@ def get_time(start_time):
 
     # print execution time
     print("Execution time (HH:MM:SS.mmm): \033[92m{}:{}:{}.{}\033[0m".format(formatted_hours, formatted_minutes, formatted_seconds, formatted_milliseconds))
-    print("-" * 50)
+    print("-" * 65)
     print()
 
 def main():
@@ -73,8 +74,8 @@ def main():
     test_metadata : pd.DataFrame
     train_metadata, test_metadata = dp.read_data(sys.argv[1], sys.argv[2])
 
-    di.get_EDA(train_metadata)
-    di.get_EDA(test_metadata)
+    # di.get_EDA(train_metadata)
+    # di.get_EDA(test_metadata)
 
     # =========================== Data Preprocessing ===========================
     # preprocess train/test metadata files, impute missing values
@@ -83,37 +84,25 @@ def main():
 
     # merge with spectrogram data
     train_metadata_file = sys.argv[1]
-    print("Attempting")
+
+    print()
+    print("==================== Preprocessing data ... =====================")
     spectrograms_dir = "eeg-data/train_spectrograms/"
     merged_data = dp.preprocess_data(train_metadata_file, spectrograms_dir)
-    print("finished")
+    print("========================== Finished =============================")
 
-    """
-    NOTE: Spectrogram data contains time values, as well as the following:
-        LL - Left Lateral
-        RL - Right Lateral
-        LP - Left Parasagittal
-        RP - Right Parasagittal
-
-        eeg_data/train_spectrograms/ directory contains {spectrogram_id}.parquet files
-        spectrogram_id is provided by train.csv metadata
-    """
     # # preprocess spectrogram data
     # merged_train_data = dp.preprocess_data(merged_data)
 
-    # ========================== Feature Engineering ===========================
-    # # generate polynomial features from data
-    # train_metadata_poly = df.get_poly_feat(train_metadata)
-    # test_metadata_poly = df.get_poly_feat(test_metadata)
+    # ======================== Split train/validation ==========================
+    # target_col = 'expert_consensus'
+    # train_set, validation_set = train_test_split(merged_data, 
+    #                                             test_size=0.2,
+    #                                             stratify=merged_data[target_col],   # handle imbalanced data
+    #                                             random_state=42)                    # for reproducibility
 
-    # # manually set columns
-    # date_cols = ['date_col_1', 'date_col_2']
-    # # date features
-    # train_metadata = df.get_date_feat(train_metadata, date_cols)
-    # test_metadata = df.get_date_feat(test_metadata, date_cols)
-
-    # ============================ Model Training =============================
-
+    # print("Train Set:\n", train_set.head())
+    # print("Validation Set:\n", validation_set.head())
 
 if __name__ == "__main__":
     # set logging level
