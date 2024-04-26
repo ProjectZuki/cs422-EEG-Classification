@@ -101,17 +101,6 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     else:
         batch = metadata
 
-    # # for testing with single file
-    # if TEST_FILE is not None:
-    #     spectrogram_id = TEST_FILE
-    #     print("Preprocssing:", spectrogram_id)
-
-    #     spectrogram_file = os.path.join(spectrograms_dir, f"{spectrogram_id}.parquet")
-    #     spectrogram_data = pd.read_parquet(spectrogram_file)
-    #     merge_row = pd.concat([pd.Series({'spectrogram_id': spectrogram_id}), spectrogram_data.mean(axis=0)], axis=0)
-
-    #     return pd.DataFrame([merge_row])
-
     # helper function to process single row of data
     def process_row(row):
         spectrogram_id = row['spectrogram_id']
