@@ -28,65 +28,41 @@ def process_spec(spec_id):
     np.save(f'train_spectrograms/{spec_id}.npy', spec)
 
 def process_npy(file):
-    # data = np.load(file)
-    # if data.shape[1] < 300:
-    #     print("file name/id: ", file , "shape: ", data.shape)
-    #     padding = ((0, 0), (0, 300 - data.shape[1]))
-    #     data = np.pad(data, padding, mode = 'constant', constant_values=0)
-    # elif data.shape[1] > 300:
-    #     data = data[:, :300]
-    # data = data[:400, :300]
-    # np.save(file, data)
-
-    data = np.load(file)
-    current_elements = data.size
-    needed_elements = 400 * 300
-    print(f"***PROCESSING {file}: {current_elements} ELEMENTS FOUND***")
-    if current_elements < needed_elements:
-        print(f"***SKIPPING {file} INSUFFICIENT DATA SIZE ({current_elements} < {needed_elements})***")
-        return
-    elif current_elements > needed_elements:
-        data = data.ravel()[:needed_elements]
-        print(f"***TRUNCATING {file} TO {needed_elements} ELEMENTS***")
     try:
+        data = np.load(file)
+        data = data.ravel()
+
+        needed_elements = 400 * 300
+        current_elements = data.size
+        if current_elements < needed_elements:
+            padding_needed = needed_elements - current_elements
+            data = np.pad(data, (0, padding_needed), mode='constant', constant_values=0)
+        elif current_elements > needed_elements:
+            data = data[:needed_elements]
+
         data = data.reshape(400, 300)
-    except ValueError as e:
-        print(f"***RESHAPE ERROR ON {file}: {str(e)}***")
-        return
-    np.save(file, data)
-    print(f"***SAVED {file} POST RESHAPE***")
+        np.save(file, data)
+        print(f"***PROCESSED {file}: NEW SHAPE {data.shape}***")
+    except Exception as e:
+        print(f"***ERROR PROCESSING {file}: {e}***")
 
 def all_npy(dir):
     files = [os.path.join(dir, f) for f in os.listdir(dir) if f.endswith('.npy')]
     _ = joblib.Parallel(n_jobs=-1, backend='loky')(
         joblib.delayed(process_npy)(file) for file in tqdm(files, total=len(files))
     )
-
 def load_and_preprocess_image(file, label, image_size):
-    # image = tf.io.read_file(file)
-    # image = tf.io.decode_raw(image, tf.float32)
-    # image = tf.reshape(image, [image_size[0], image_size[1], 1])
-    # image = tf.image.resize(image, [image_size[0], image_size[1]])  
-    # image = (image - tf.reduce_min(image)) / (tf.reduce_max(image) - tf.reduce_min(image))
-    # image.set_shape([image_size[0], image_size[1], 1])  
-    
-    # return image, label
-
-    #delete below if error
-    # image = tf.io.read_file(file)
-    # image = tf.io.decode_raw(image, tf.float32)
-    # original = [400, -1, 1]
-    # image = tf.reshape(image, original)
-    # image = tf.image.resize(image, [image_size[0], image_size[1]])
-    # image = (image - tf.reduce_min(image)) / (tf.reduce_max(image) - tf.reduce_min(image))
-    # image.set_shape([image_size[0], image_size[1], 1])
-    # return image, label
-
     image = tf.io.read_file(file)
     image = tf.io.decode_raw(image, tf.float32)
-    image = tf.reshape(image, [400, 300, 1])
+    image = tf.reshape(image, [image_size[0] * image_size[1]])
+    if tf.size(image) < image_size[0] * image_size[1]:
+        image = tf.pad(image, [[0, image_size[0] * image_size[1] - tf.size(image)]], constant_values=0)
+    else:
+        image = image[:image_size[0] * image_size[1]]
+    image = tf.reshape(image, [image_size[0], image_size[1], 1])
     image = (image - tf.reduce_min(image)) / (tf.reduce_max(image) - tf.reduce_min(image))
     return image, label
+
 
 
 def set_shapes(img, label, img_shape):
