@@ -87,7 +87,7 @@ def main():
 
     print()
     print("==================== Preprocessing data ... =====================")
-    spectrograms_dir = "eeg-data/train_spectrograms/"
+    spectrograms_dir = "train_spectrograms/"
     merged_data = dp.preprocess_data(train_metadata_file, spectrograms_dir)
     print("========================== Finished =============================")
 

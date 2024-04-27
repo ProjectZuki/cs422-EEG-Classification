@@ -27,8 +27,8 @@ def read_data(train_file, test_file):
         pd.DataFrame: The contents of the testing data file.
     """
     try:
-        train_data = load_data('eeg-data/' + train_file)
-        test_data = load_data('eeg-data/' + test_file)
+        train_data = load_data(train_file)
+        test_data = load_data(test_file)
     except FileNotFoundError as e:
         print("File not found: ", e)
         print("Exiting ...")
@@ -95,7 +95,7 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
 
 
     # read metadata
-    metadata = pd.read_csv("eeg-data/" + metadata_file)
+    metadata = pd.read_csv(metadata_file)
 
     if TEST_MODE:
         batch = metadata[:BATCH_SIZE]
