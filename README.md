@@ -21,6 +21,7 @@ This project aims to apply machine learning techniques to classify and detect ha
 ## Dataset
 
 Datasets are provided by Harvard Medical School. Details as well as the dataset can be obtained [here](https://www.kaggle.com/competitions/hms-harmful-brain-activity-classification/data).
+Or by running the command under [Dependencies](#dependencies)
 
 ## Usage
 `train.py`: 
@@ -43,6 +44,11 @@ When running this project, the following python libraries are required:
 
 ```bash
 pip install pandas numpy tensorflow sklearn
+```
+
+Download DataSet:
+```bash
+kaggle competitions download -c hms-harmful-brain-activity-classification
 ```
 
 ## License
