@@ -1,2 +1,8 @@
 egg-data/*
 /eeg-data
+/example_figures
+/test_eegs
+/test_spectrograms
+/train_eegs
+/train_spectrograms
+/__pycache__
