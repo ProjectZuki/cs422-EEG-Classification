@@ -1,1 +1,5 @@
-eeg-data/ filter=lfs diff=lfs merge=lfs -text
+example_figures/ filter=lfs diff=lfs merge=lfs -text
+test_eegs/ filter=lfs diff=lfs merge=lfs -text
+test_spectrograms/ filter=lfs diff=lfs merge=lfs -text
+train_eegs/ filter=lfs diff=lfs merge=lfs -text
+train_spectrograms/ filter=lfs diff=lfs merge=lfs -text
