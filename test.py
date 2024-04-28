@@ -3,12 +3,16 @@ import joblib
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import time
+
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 import tensorflow as tf
 from tensorflow.data.experimental import AUTOTUNE
-import time
+from concurrent.futures import ThreadPoolExecutor
+
+import helper as hp
 
 # Set GPU memory growth to avoid allocating all GPU memory at once
 physical_devices = tf.config.experimental.list_physical_devices("GPU")
@@ -160,6 +164,5 @@ if __name__ == '__main__':
 
     main()  # Run the main function
 
-    end_time = time.time()  # Stop the timer
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f"Elapsed Time: {elapsed_time} seconds")  # Print the elapsed time
+    # show execution time
+    hp.exec_time(start_time)
