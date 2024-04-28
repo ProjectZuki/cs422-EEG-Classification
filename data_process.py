@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
 MULTITHREAD : bool  = False  # multithreading flag
 TEST_FILE   : str   = None   # change to filename for testing
 TEST_MODE   : bool  = True  # testing mode flag
-BATCH_SIZE  : int   = 1    # batch size for testing
+BATCH_SIZE  : int   = 15    # batch size for testing
 
 def read_data(train_file, test_file):
     """

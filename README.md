@@ -43,7 +43,7 @@ When running this project, the following python libraries are required:
 - sklearn
 
 ```bash
-pip install pandas numpy tensorflow sklearn
+pip install pandas numpy tensorflow scikit-learn pyarrow
 ```
 
 Download DataSet:
