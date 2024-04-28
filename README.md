@@ -24,11 +24,10 @@ Datasets are provided by Harvard Medical School. Details as well as the dataset 
 Or by running the command under [Dependencies](#dependencies)
 
 ## Usage
-`train.py`: 
+`test.py`: 
 ```bash
-python train.py <train_file> <test_file>
+python test.py
 ```
-_NOTE: For multithreading, include -m as 4th command line argument_
 
 `unittest.py`
 ```bash

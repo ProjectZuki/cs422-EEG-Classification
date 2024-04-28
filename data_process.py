@@ -5,14 +5,24 @@ Loads the data from the training and testing sets.
 import pandas as pd
 import numpy as np
 import os
+import joblib
+
+# suppress tensorflow specific warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
+from tqdm import tqdm
+import tensorflow as tf
 
 from sklearn.impute import KNNImputer
 from concurrent.futures import ThreadPoolExecutor      # MOAR POWER
+
 
 MULTITHREAD : bool  = False  # multithreading flag
 TEST_FILE   : str   = None   # change to filename for testing
 TEST_MODE   : bool  = True  # testing mode flag
 BATCH_SIZE  : int   = 15    # batch size for testing
+
+N_THREADS   : int = os.cpu_count() - 1
 
 def read_data(train_file, test_file):
     """
@@ -68,25 +78,27 @@ def impute_null(data: pd.DataFrame) -> pd.DataFrame:
     if data.empty:
         return data
 
-    # manually define column names
-    columns = data.columns
-
-    # exclude non-numeric columns (i.e. expert_concensus column)
+    # Extract the numeric columns that need imputation
     numeric_columns = data.select_dtypes(include=[np.number]).columns
-    data_numeric = data[numeric_columns]
 
-    # use KNN to impute values
+    # If there are no numeric columns, return the original DataFrame
+    if numeric_columns.empty:
+        return data
+
+    # Instantiate KNNImputer with a specified number of neighbors
     impute = KNNImputer(n_neighbors=5)
-    imputed_values = impute.fit_transform(data_numeric)
 
-    df = pd.DataFrame(imputed_values, columns=numeric_columns, index=data_numeric.index)
+    # Apply KNN imputation only to the numeric columns
+    imputed_values = impute.fit_transform(data[numeric_columns])
 
-    # combine non-numeric columns with imputed values
-    for col in columns:
-        if col not in numeric_columns:
-            df[col] = data[col]
+    # Create a new DataFrame with imputed values
+    df_imputed = pd.DataFrame(imputed_values, columns=numeric_columns, index=data.index)
 
-    return df
+    # Merge non-numeric columns back into the imputed DataFrame
+    non_numeric_columns = data.select_dtypes(exclude=[np.number]).columns
+    df_final = df_imputed.join(data[non_numeric_columns])
+
+    return df_final
 
 def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     """
@@ -158,3 +170,61 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
         print("Error: 'label' (expert_consensus) is missing in merged data")
 
     return merged_data
+
+def load_and_preprocess_image(file, label, image_size):
+    image = tf.io.read_file(file)  # Read the file as a byte array
+    image = tf.io.decode_raw(image, tf.float32)  # Decode the raw data into a float32 array
+    image = tf.reshape(image, [image_size[0] * image_size[1]])  # Reshape to desired size
+    # Adjust the size if required (pad or trim)
+    if tf.size(image) < image_size[0] * image_size[1]:
+        image = tf.pad(image, [[0, image_size[0] * image_size[1] - tf.size(image)]], constant_values=0)
+    else:
+        image = image[:image_size[0] * image_size[1]]
+    image = tf.reshape(image, [image_size[0], image_size[1], 1])  # Add a channel dimension
+    # Normalize the image
+    image = (image - tf.reduce_min(image)) / (tf.reduce_max(image) - tf.reduce_min(image))
+    return image, label
+
+
+def process_npy(file):
+    try:
+        data = np.load(file)
+        data = data.ravel()
+
+        needed_elements = 400 * 300
+        current_elements = data.size
+        if current_elements < needed_elements:
+            padding_needed = needed_elements - current_elements
+            data = np.pad(data, (0, padding_needed), mode='constant', constant_values=0)
+        elif current_elements > needed_elements:
+            data = data[:needed_elements]
+
+        data = data.reshape(400, 300)
+        np.save(file, data)
+        # print(f"***PROCESSED {file}: NEW SHAPE {data.shape}***")
+    except Exception as e:
+        print(f"\n\033[91mError:\033[0m processing {file}: {e}")
+
+def all_npy(dir):
+    # Corrected list comprehension to get all .npy files in the given directory
+    files = [os.path.join(dir, f) for f in os.listdir(dir) if f.endswith('.npy')]
+
+    # Use joblib for parallel processing
+    _ = joblib.Parallel(n_jobs=N_THREADS, backend='loky')(
+        joblib.delayed(process_npy)(file) for file in tqdm(files, total=len(files))
+    )
+
+def process_spec(spec_id):
+    try: 
+        spec_path = f'train_spectrograms/{spec_id}.parquet'
+        spec = pd.read_parquet(spec_path)
+
+        # find missing values, use KNN to impute
+        spec = impute_null(spec)
+
+        spec = spec.fillna(0).values[:, 1:].T
+        spec = spec.astype('float32')
+        np.save(f'train_spectrograms/{spec_id}.npy', spec)
+    except Exception as e:
+        print(f"\n\033[91mError:\033[0m processing: {spec_id}: {e}")
+    np.save(f'train_spectrograms/{spec_id}.npy', spec)
