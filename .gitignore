@@ -6,3 +6,6 @@ egg-data/*
 /train_eegs
 /train_spectrograms
 /__pycache__
+
+train.csv
+test.csv
