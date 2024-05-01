@@ -40,9 +40,11 @@ When running this project, the following python libraries are required:
 - numpy
 - tensorflow
 - sklearn
+- tqdm
+- joblib
 
 ```bash
-pip install pandas numpy tensorflow scikit-learn pyarrow
+pip install pandas numpy tqdm joblib tensorflow scikit-learn
 ```
 
 Download DataSet:

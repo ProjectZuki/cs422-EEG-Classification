@@ -14,6 +14,7 @@ from tensorflow.data.experimental import AUTOTUNE
 
 import data_process as dp
 
+TEST_MODE = False
 
 def set_shapes(img, label, img_shape):
     img.set_shape(img_shape)  # Set static shape for TensorFlow optimizations

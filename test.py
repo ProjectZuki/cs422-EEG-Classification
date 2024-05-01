@@ -15,6 +15,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 import tensorflow as tf
 from tensorflow.data.experimental import AUTOTUNE
+from sklearn.model_selection import KFold
 
 # custom imports
 import helper       as hp
@@ -42,11 +43,6 @@ class Config:
         self.name2label = {name: i for i, name in enumerate(self.class_names)}
 
 def main():
-
-    # if sys.argv[1] == '-t':
-    #     # set test_mode = true
-    #     print("\033[92mExecuting in test mode ...\033[0m")
-
     config = Config()
     df = pd.read_csv('train.csv')
     df['spec2_path'] = 'train_spectrograms/' + df['spectrogram_id'].astype(str) + '.npy'
@@ -64,6 +60,28 @@ def main():
     _ = joblib.Parallel(n_jobs=dp.N_THREADS, backend="loky")(
         joblib.delayed(dp.process_spec)(spec_id) for spec_id in tqdm(spec_ids, total=len(spec_ids))
     )
+
+    # kf = KFold(n_splits=config.fold, shuffle=True, random_state=42)
+    # for i, (train_index, val_index) in enumerate(kf.split(df)):
+    #     print(f"Processing Fold {i + 1}")
+    #     train_df = df.iloc[train_index]
+    #     val_df = df.iloc[val_index]
+    #     train_ds = md.build_ds(
+    #         train_df, config.batch_size, config.image_size, shuffle=True, augment=True
+    #     )
+    #     val_ds = md.build_ds(
+    #         val_df, config.batch_size, config.image_size, shuffle=False, augment=False
+    #     )
+    #     model = md.create_model(
+    #         (config.image_size[0], config.image_size[1], 1), config.classes
+    #     )
+    #     history = model.fit(train_ds, epochs=config.epochs)
+    #     test_loss, test_acc = model.evaluate(val_ds, verbose=config.verbose)
+    #     print(f"Fold {i + 1} completed")
+    #     print(f"test accuracy: {test_acc}")
+    #     print(f"test loss: {test_loss}")
+    #     predictions = model.predict(val_ds)
+    #     print(predictions)
 
     # training and validation datasets
     train_ds = md.build_ds(df, config.batch_size, config.image_size, shuffle=True, augment=True)
