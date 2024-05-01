@@ -27,15 +27,9 @@ Datasets are provided by Harvard Medical School. Details as well as the dataset 
 Or by running the command under [Dependencies](#dependencies)
 
 ## Usage
-`train.py`: 
+`test.py`: 
 ```bash
-python train.py <train_file> <test_file>
-```
-_NOTE: For multithreading, include -m as 4th command line argument_
-
-`unittest.py`
-```bash
-python unittest.py
+python test.py
 ```
 
 ## Dependencies
@@ -44,9 +38,15 @@ When running this project, the following python libraries are required:
 - numpy
 - tensorflow
 - sklearn
+- tqdm
+- joblib
 
 ```bash
-pip install pandas numpy tensorflow scikit-learn pyarrow
+pip install pandas numpy tqdm joblib tensorflow scikit-learn keras
+```
+
+```bash
+conda create -n EEG pandas numpy tqdm joblib tensorflow scikit-learn keras
 ```
 
 Download DataSet:
