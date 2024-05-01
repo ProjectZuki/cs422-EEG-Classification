@@ -1,3 +1,12 @@
+"""
+model.py: Helper file for test.py that includes functions for building TensorFlow dataset
+    and creating CNN model.
+"""
+
+__author__ = "Willie Alcaraz"
+__credits__ = ["Arian Izadi", "Yohan Dizon"]
+__license__ = "MIT License"
+__email__ = "willie.alcaraz@gmail.com"
 
 import numpy as np
 import pandas as pd
@@ -17,15 +26,52 @@ import data_process as dp
 TEST_MODE = False
 
 def set_shapes(img, label, img_shape):
+    """
+    Sets shapes for image and label tensors.
+    
+    Args:
+        img (tf.Tensor): The image tensor.
+        label (tf.Tensor): The label tensor.
+        img_shape (tuple): The shape of the image tensor.
+        
+    Returns:
+        tf.Tensor: The image tensor with the specified shape.
+        tf.Tensor: The label tensor with the specified shape.
+    """
     img.set_shape(img_shape)  # Set static shape for TensorFlow optimizations
     label.set_shape([])  # Set shape for label (scalar)
     return img, label
 
 def augmentation(image, label):
+    """
+    Apply augmentation to the image tensor.
+
+    Args:
+        image (tf.Tensor): The image tensor.
+        label (tf.Tensor): The label tensor.
+    
+    Returns:
+        tf.Tensor: The augmented image tensor.
+        tf.Tensor: The label tensor.
+    """
+
     image = tf.image.random_flip_left_right(image)
     return image, label
 
 def build_ds(df, batch_size, image_size, shuffle=True, augment=True):
+    """
+    Builds a TensorFlow dataset from the input DataFrame.
+    
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        batch_size (int): The batch size.
+        image_size (tuple): The image size.
+        shuffle (bool): Whether to shuffle the dataset.
+        augment (bool): Whether to apply augmentation.
+    
+    Returns:
+        tf.data.Dataset: TensorFlow dataset.
+    """
     paths = df['spec2_path'].values
     labels = df['class_label'].values
     dataset = tf.data.Dataset.from_tensor_slices((paths, labels))
@@ -42,6 +88,17 @@ def build_ds(df, batch_size, image_size, shuffle=True, augment=True):
     return dataset.batch(batch_size).prefetch(buffer_size=AUTOTUNE)  # Prefetch to improve throughput
 
 def create_model(input_shape, num_classes):
+    """
+    Creates model for convolutional neural network.
+    
+    Args:
+        input_shape (tuple): The input shape for the model.
+        num_classes (int): The number of classes.
+    
+    Returns:
+        tf.keras.Sequential: The model.
+    """
+
     model = Sequential([
         Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
         MaxPooling2D((2, 2)),

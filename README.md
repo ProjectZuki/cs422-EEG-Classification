@@ -29,11 +29,6 @@ Or by running the command under [Dependencies](#dependencies)
 python test.py
 ```
 
-`unittest.py`
-```bash
-python unittest.py
-```
-
 ## Dependencies
 When running this project, the following python libraries are required:
 - pandas
@@ -44,7 +39,11 @@ When running this project, the following python libraries are required:
 - joblib
 
 ```bash
-pip install pandas numpy tqdm joblib tensorflow scikit-learn
+pip install pandas numpy tqdm joblib tensorflow scikit-learn keras
+```
+
+```bash
+conda create -n EEG pandas numpy tqdm joblib tensorflow scikit-learn keras
 ```
 
 Download DataSet:

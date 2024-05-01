@@ -1,6 +1,25 @@
+"""
+helper.py: Helper file for test.py that includes additional helper functions not directly
+    related to the model or CNN.
+"""
+
+__author__ = "Willie Alcaraz"
+__credits__ = ["Arian Izadi", "Yohan Dizon"]
+__license__ = "MIT License"
+__email__ = "willie.alcaraz@gmail.com"
+
 import time
 
 def exec_time(start_time):
+    """
+    Calculates execution time, then prints in specified format
+    
+    Args:
+        start_time (float): The time the execution started
+    
+    Returns:
+        N/A
+    """
     # end time
     end_time = time.time()
     print()

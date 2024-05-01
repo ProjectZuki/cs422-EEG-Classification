@@ -1,3 +1,16 @@
+"""
+test.py: Main script for running the EEG Classification model.
+
+This script will process EEG spectrogram data provided by Harvard Medical School and trains a 
+    convolutional neural network (CNN) model for classifying the EEG data into one of six classes.
+"""
+
+__author__ = "Willie Alcaraz"
+__credits__ = ["Arian Izadi", "Yohan Dizon"]
+__license__ = "MIT License"
+__email__ = "willie.alcaraz@gmail.com"
+
+
 import os
 import joblib
 import numpy as np
@@ -31,6 +44,20 @@ if physical_devices:
 
 # Data Processing Functions
 class Config:
+    """
+    Configuration class for EEG Classification model.
+    
+    Attributes:
+        image_size (list): size of input images [width, height].
+        epochs (int): number of training epochs.
+        batch_size (int): batch size for training.
+        classes (int): number of classes in classification problem.
+        fold (int): fold number for cross-validation.
+        class_names (list): names of classes.
+        verbose (int): verbosity level (0 - silent, 1 - progress bar, 2 - one line per epoch).
+        label2name (dict): A dictionary mapping label indices to class names.
+        name2label (dict): A dictionary mapping class names to label indices.
+    """
     def __init__(self):
         self.image_size = [400, 300]
         self.epochs = 1
@@ -43,6 +70,9 @@ class Config:
         self.name2label = {name: i for i, name in enumerate(self.class_names)}
 
 def main():
+    """
+    Main function for running EEG Classification model.
+    """
     config = Config()
     df = pd.read_csv('train.csv')
     df['spec2_path'] = 'train_spectrograms/' + df['spectrogram_id'].astype(str) + '.npy'
@@ -60,28 +90,6 @@ def main():
     _ = joblib.Parallel(n_jobs=dp.N_THREADS, backend="loky")(
         joblib.delayed(dp.process_spec)(spec_id) for spec_id in tqdm(spec_ids, total=len(spec_ids))
     )
-
-    # kf = KFold(n_splits=config.fold, shuffle=True, random_state=42)
-    # for i, (train_index, val_index) in enumerate(kf.split(df)):
-    #     print(f"Processing Fold {i + 1}")
-    #     train_df = df.iloc[train_index]
-    #     val_df = df.iloc[val_index]
-    #     train_ds = md.build_ds(
-    #         train_df, config.batch_size, config.image_size, shuffle=True, augment=True
-    #     )
-    #     val_ds = md.build_ds(
-    #         val_df, config.batch_size, config.image_size, shuffle=False, augment=False
-    #     )
-    #     model = md.create_model(
-    #         (config.image_size[0], config.image_size[1], 1), config.classes
-    #     )
-    #     history = model.fit(train_ds, epochs=config.epochs)
-    #     test_loss, test_acc = model.evaluate(val_ds, verbose=config.verbose)
-    #     print(f"Fold {i + 1} completed")
-    #     print(f"test accuracy: {test_acc}")
-    #     print(f"test loss: {test_loss}")
-    #     predictions = model.predict(val_ds)
-    #     print(predictions)
 
     # training and validation datasets
     train_ds = md.build_ds(df, config.batch_size, config.image_size, shuffle=True, augment=True)

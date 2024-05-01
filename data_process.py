@@ -1,6 +1,12 @@
 """
-Loads the data from the training and testing sets.
+data_process.py: Helper function for test.py.
+    Loads the data from the training and testing sets. Includes data preprocessing.
 """
+
+__author__ = "Willie Alcaraz"
+__credits__ = ["Arian Izadi", "Yohan Dizon"]
+__license__ = "MIT License"
+__email__ = "willie.alcaraz@gmail.com"
 
 import pandas as pd
 import numpy as np
@@ -103,6 +109,13 @@ def impute_null(data: pd.DataFrame) -> pd.DataFrame:
 def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     """
     Preprocesses the metadata file and merges with the spectrogram data.
+
+    Args:
+        metadata_file (str): The path to the metadata file.
+        spectrograms_dir (str): The directory containing the spectrogram data.
+
+    Returns:
+        pd.DataFrame: merged DataFrame
     """
 
 
@@ -172,6 +185,18 @@ def preprocess_data(metadata_file: str, spectrograms_dir: str) -> pd.DataFrame:
     return merged_data
 
 def load_and_preprocess_image(file, label, image_size):
+    """
+    Load and preprocess the image data.
+    
+    Args:
+        file (str): The path to the image file.
+        label (int): The label for the image.
+        image_size (tuple): The desired size of the image.
+    
+    Returns:
+        image : tf.Tensor: image data
+        label : int: image label
+    """
     image = tf.io.read_file(file)  # Read the file as a byte array
     image = tf.io.decode_raw(image, tf.float32)  # Decode the raw data into a float32 array
     image = tf.reshape(image, [image_size[0] * image_size[1]])  # Reshape to desired size
@@ -187,6 +212,15 @@ def load_and_preprocess_image(file, label, image_size):
 
 
 def process_npy(file):
+    """
+    Process the .npy file by reshaping it to the correct dimensions.
+    
+    Args:
+        file (str): The path to the .npy file.
+        
+    Return:
+        N/A
+    """
     try:
         data = np.load(file)
         data = data.ravel()
@@ -206,6 +240,15 @@ def process_npy(file):
         print(f"\n\033[91mError:\033[0m processing {file}: {e}")
 
 def all_npy(dir):
+    """
+    Process all .npy files in the given directory.
+    
+    Args:
+        dir (str): The directory containing the .npy files.
+    
+    Return:
+        N/A
+    """
     # Corrected list comprehension to get all .npy files in the given directory
     files = [os.path.join(dir, f) for f in os.listdir(dir) if f.endswith('.npy')]
 
@@ -215,6 +258,15 @@ def all_npy(dir):
     )
 
 def process_spec(spec_id):
+    """
+    Preprocess spectrogram data
+    
+    Args:
+        spec_id (str): The spectrogram ID.
+    
+    Return:
+        N/A
+    """
     try: 
         spec_path = f'train_spectrograms/{spec_id}.parquet'
         spec = pd.read_parquet(spec_path)
