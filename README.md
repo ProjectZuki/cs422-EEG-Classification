@@ -4,6 +4,7 @@ CS422 UNLV Spring '24 | Electroencephalography (EEG) Classification to detect ha
 
 This project is the collaborative work of the following individuals
 
+
 [ProjectZuki](https://github.com/ProjectZuki)
 [arianizadi](https://github.com/arianizadi)
 [fourfourfourfourthreethreethree](https://github.com/fourfourfourfourthreethreethree)
@@ -12,7 +13,9 @@ This project is the collaborative work of the following individuals
 
 1. [Overview](#overview)
 2. [Dataset](#dataset)
-3. [License](#license)
+3. [Usage](#usage)
+4. [Dependencies](#dependencies)
+5. [License](#license)
 
 ## Overview
 
@@ -21,6 +24,35 @@ This project aims to apply machine learning techniques to classify and detect ha
 ## Dataset
 
 Datasets are provided by Harvard Medical School. Details as well as the dataset can be obtained [here](https://www.kaggle.com/competitions/hms-harmful-brain-activity-classification/data).
+Or by running the command under [Dependencies](#dependencies)
+
+## Usage
+`train.py`: 
+```bash
+python train.py <train_file> <test_file>
+```
+_NOTE: For multithreading, include -m as 4th command line argument_
+
+`unittest.py`
+```bash
+python unittest.py
+```
+
+## Dependencies
+When running this project, the following python libraries are required:
+- pandas
+- numpy
+- tensorflow
+- sklearn
+
+```bash
+pip install pandas numpy tensorflow scikit-learn pyarrow
+```
+
+Download DataSet:
+```bash
+kaggle competitions download -c hms-harmful-brain-activity-classification
+```
 
 ## License
 
