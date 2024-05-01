@@ -2,6 +2,7 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import KFold
 import tensorflow as tf
 from tqdm import tqdm
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
@@ -15,7 +16,7 @@ class Config:
         self.epochs = 1
         # amount of data to load into memory at once
         # increase if you have more memory
-        self.batch_size = 2048
+        self.batch_size = 1536
         # number of output classes
         self.classes = 6
         self.fold = 5
@@ -53,7 +54,7 @@ def process_npy(file):
 
         data = data.reshape(400, 300)
         np.save(file, data)
-        print(f"***PROCESSED {file}: NEW SHAPE {data.shape}***")
+        # print(f"***PROCESSED {file}: NEW SHAPE {data.shape}***")
     except Exception as e:
         print(f"***ERROR PROCESSING {file}: {e}***")
 
@@ -124,12 +125,12 @@ def main():
     df = pd.read_csv("train.csv")
     df["spec2_path"] = "train_spectrograms/" + df["spectrogram_id"].astype(str) + ".npy"
     df["class_label"] = df["expert_consensus"].map(config.name2label)
-    dimensions = np.load("train_spectrograms/353733.npy")
-    print(dimensions.shape)
+    # dimensions = np.load("train_spectrograms/353733.npy")
+    # print(dimensions.shape)
     # print(dimensions)
 
     # PROCESSING ALL NPY FILES TO CONVERT TO PROPER FORMAT
-    print("***PROCESSING NPY FILES (WATCH DISK)***")
+    # print("***PROCESSING NPY FILES (WATCH DISK)***")
     all_npy("train_spectrograms")
 
     print("***PROCESSING SPECTROGRAMS (WATCH CPU)***")
@@ -139,22 +140,28 @@ def main():
         for spec_id in tqdm(spec_ids, total=len(spec_ids))
     )
 
-    train_ds = build_ds(
-        df, config.batch_size, config.image_size, shuffle=True, augment=True
-    )
-    val_ds = build_ds(
-        df, config.batch_size, config.image_size, shuffle=False, augment=False
-    )
-
-    model = create_model(
-        (config.image_size[0], config.image_size[1], 1), config.classes
-    )
-    history = model.fit(train_ds, epochs=config.epochs)
-    test_loss, test_acc = model.evaluate(val_ds, verbose=config.verbose)
-    print(f"test accuracy: {test_acc}")
-    print(f"test loss: {test_loss}")
-    predictions = model.predict(val_ds)
-    print(predictions)
+    # use KFold to split the data into train and validation sets
+    kf = KFold(n_splits=config.fold, shuffle=True, random_state=42)
+    for i, (train_index, val_index) in enumerate(kf.split(df)):
+        print(f"Processing Fold {i + 1}")
+        train_df = df.iloc[train_index]
+        val_df = df.iloc[val_index]
+        train_ds = build_ds(
+            train_df, config.batch_size, config.image_size, shuffle=True, augment=True
+        )
+        val_ds = build_ds(
+            val_df, config.batch_size, config.image_size, shuffle=False, augment=False
+        )
+        model = create_model(
+            (config.image_size[0], config.image_size[1], 1), config.classes
+        )
+        history = model.fit(train_ds, epochs=config.epochs)
+        test_loss, test_acc = model.evaluate(val_ds, verbose=config.verbose)
+        print(f"Fold {i + 1} completed")
+        print(f"test accuracy: {test_acc}")
+        print(f"test loss: {test_loss}")
+        predictions = model.predict(val_ds)
+        print(predictions)
 
 
 def create_model(input_shape, num_classes):
