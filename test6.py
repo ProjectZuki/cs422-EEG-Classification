@@ -15,10 +15,10 @@ class Config:
         self.epochs = 1
         # amount of data to load into memory at once
         # increase if you have more memory
-        self.batch_size = 64
+        self.batch_size = 2048
         # number of output classes
         self.classes = 6
-        self.fold = 1
+        self.fold = 5
         # names of the classes
         self.class_names = ["Seizure", "LPD", "GPD", "LRDA", "GRDA", "Other"]
         self.verbose = 1

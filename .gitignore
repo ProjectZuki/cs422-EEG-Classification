@@ -9,3 +9,5 @@ egg-data/*
 
 train.csv
 test.csv
+hms-harmful-brain-activity-classification.zip
+sample_submission.csv
